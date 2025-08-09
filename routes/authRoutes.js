@@ -6,11 +6,11 @@ const upload = require("../middlewares/uploadMiddleware");
 const router = express.Router();
 
 //Auth Routes
-router.post("/register", registerUser); //Register User
-router.post("/login", loginUser); //Login user
-router.get("/profile", protect, getUserProfile); //Get User Profile
+router.post("/api/auth/register", registerUser); //Register User
+router.post("/api/auth/login", loginUser); //Login user
+router.get("/api/auth/profile", protect, getUserProfile); //Get User Profile
 
-router.post("/upload-image", upload.single("image"), (req, res) => {
+router.post("/api/auth/upload-image", upload.single("image"), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ message: "No file uploaded" });
   }
