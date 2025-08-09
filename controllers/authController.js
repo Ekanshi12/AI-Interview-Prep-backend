@@ -32,6 +32,7 @@ const registerUser = async (req, res) => {
             profileImageUrl,
         });
 
+        
         //Return user data with JWT
         res.status(201).json({
             _id: user._id,

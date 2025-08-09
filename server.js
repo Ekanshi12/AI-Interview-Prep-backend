@@ -12,32 +12,55 @@ const { generateInterviewQuestions, generateConceptExplanation } = require("./co
 
 const app = express();
 
-//Middleware to handle CORS
-app.use(
-    cors({
-        origin: "*",
-        methods: ["GET", "POST", "PUT", "DELETE"],
-        allowedHeaders: ["Content-Type", "Authorization"],
-    })
-);
-
+// Connect to database first
 connectDB()
 
-//Middleware
-app.use(express.json());
+// Enhanced CORS middleware - must be before other middleware
+app.use(cors({
+    origin: [
+        'https://ai-interview-prep-frontend.vercel.app',
+        'http://localhost:3000',
+        'http://localhost:5173',
+        'http://localhost:3001'
+    ],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: [
+        'Content-Type', 
+        'Authorization',
+        'X-Requested-With',
+        'Accept',
+        'Origin'
+    ],
+    credentials: true,
+    preflightContinue: false,
+    optionsSuccessStatus: 200
+}));
 
-//Routes
+// Handle preflight requests explicitly
+app.options('*', cors());
+
+// Body parsing middleware
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
+
+// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/sessions", sessionRoutes);
 app.use("/api/questions", questionRoutes);
 
-app.use("/api/ai/generate-questions", protect, generateInterviewQuestions);
-app.use("/api/ai/generate-explanation", protect, generateConceptExplanation);
+// AI routes (these should be POST routes, not middleware)
+app.post("/api/ai/generate-questions", protect, generateInterviewQuestions);
+app.post("/api/ai/generate-explanation", protect, generateConceptExplanation);
 
-//Server uploads folder
-// app.use("/uploads", express.static(path.join(__dirname, "uploads"), {}));
+// Health check endpoint
+app.get('/', (req, res) => {
+    res.json({ message: 'AI Interview Prep Backend is running!' });
+});
 
-//Start Server
+// Server uploads folder
+// app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+// Start Server
 const PORT = process.env.PORT || 5000;
 
 // For Vercel deployment
